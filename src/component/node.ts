@@ -1,30 +1,29 @@
 import {
+  FLOW_NODE_HANDLE_TYPE,
   FlowNodeColor,
+  FlowNodeHandleType,
   FlowNodeSize,
   FlowTextProperty,
 } from "@/config/default";
-import { flowInstance } from "@/flowInstance";
-import { FlowNodeData, FlowNodeOpts } from "@/type/node";
+import { FlowInstance } from "@/type";
+import { FlowNodeData } from "@/type/node";
 import Konva from "konva";
 import Handle from "./handle";
 
 export default class FlowNode extends Handle {
-  nodeData: FlowNodeData;
-  shape: Konva.Group;
-  constructor(data: FlowNodeData, flowNodeOpts: FlowNodeOpts) {
-    super(flowNodeOpts);
-    this.nodeContext = this;
-    this.shape = new Konva.Group({
-      ...data.position,
-    });
-    this.nodeData = data;
+  graphics = new Konva.Group();
+  topPoint: number[] = [];
+  bottomPoint: number[] = [];
+  constructor(flowNodeData: FlowNodeData, flowInstance: FlowInstance) {
+    super(flowNodeData, flowInstance);
+    this.flowInstance = flowInstance;
+    this.updateChildren();
   }
-  render() {
-    const node = this.nodeData;
-    const { layer } = flowInstance;
-    const group = new Konva.Group({
-      ...node.position,
-    });
+  updateChildren() {
+    const node = this.flowNodeData;
+    const graphics = this.graphics;
+    graphics.position({ x: node.position.x, y: node.position.y });
+
     const rect = new Konva.Rect({
       strokeWidth: FlowNodeSize.STORE_WIDTH,
       stroke: FlowNodeColor.STORE_COLOR,
@@ -38,10 +37,35 @@ export default class FlowNode extends Handle {
       fontSize: FlowNodeSize.FONT_SIZE,
       padding: FlowTextProperty.PADDING,
       align: FlowTextProperty.ALIGN,
-      verticalAlign: FlowTextProperty.VERCTIL_ALIGN,
+      verticalAlign: FlowTextProperty.VERTICAL_ALIGN,
     });
-    group.add(rect);
-    group.add(text);
-    layer.add(group);
+    const topCirclePoint = new Konva.Circle({
+      radius: FlowNodeSize.RADIUS_SIZE,
+      x: rect.width() / 2,
+      y: 0,
+      fill: FlowNodeColor.CIRCLE_COLOR,
+    });
+    topCirclePoint.setAttr(FLOW_NODE_HANDLE_TYPE, FlowNodeHandleType.TARGET);
+    this.topPoint = Object.values(topCirclePoint.getPosition());
+    const bottomCirclePoint = new Konva.Circle({
+      radius: FlowNodeSize.RADIUS_SIZE,
+      x: rect.width() / 2,
+      y: rect.height(),
+      fill: FlowNodeColor.CIRCLE_COLOR,
+    });
+    bottomCirclePoint.setAttr(FLOW_NODE_HANDLE_TYPE, FlowNodeHandleType.SOURCE);
+    this.bottomPoint = Object.values(bottomCirclePoint.getPosition());
+
+    if (!node.isFirstNode) {
+      graphics.add(topCirclePoint);
+    }
+    if (!node.isLastNode) {
+      graphics.add(bottomCirclePoint);
+    }
+    graphics.add(rect);
+    graphics.add(text);
+  }
+  render() {
+    this.flowInstance.layer.add(this.graphics);
   }
 }

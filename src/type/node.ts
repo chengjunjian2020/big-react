@@ -9,6 +9,8 @@ export interface FlowNodeData {
     x: number;
     y: number;
   };
+  isFirstNode?: boolean;
+  isLastNode?: boolean;
 }
 export interface FlowNodeOpts {
   isFirstNode?: boolean;

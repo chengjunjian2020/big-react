@@ -1,8 +1,8 @@
 {
-  "name": "flow-graphix",
+  "name": "flow-graph",
   "private": true,
   "version": "0.0.4",
-  "module": "./dist/flow-graphix.js",
+  "module": "./dist/flow-graph.js",
   "type": "module",
   "exports": {
     ".": {

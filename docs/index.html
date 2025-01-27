@@ -21,8 +21,11 @@
         height: 800,
         id: "container",
       });
-      console.log(flow);
-      flow.setNodes([
+      const initialEdges = [
+        { id: "e1-2", source: "1", target: "2" },
+        { id: "e2-3", source: "2", target: "3", animated: true },
+      ];
+      flow.buildNodeFromData([
         {
           id: "1",
           data: { label: "Input Node" },
@@ -39,6 +42,7 @@
           position: { x: 250, y: 250 },
         },
       ]);
+      flow.buildEdge(initialEdges);
       flow.render();
     </script>
   </body>

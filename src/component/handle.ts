@@ -1,10 +1,11 @@
-import { FlowNodeOpts } from "@/type/node";
-import FlowNode from "./node";
+import { FlowNodeData } from "@/type/node";
+import { FlowInstance } from "@/type";
 
 export default class Handle {
-  opts: FlowNodeOpts;
-  nodeContext?: FlowNode;
-  constructor(flowNodeOpts: FlowNodeOpts) {
-    this.opts = flowNodeOpts;
+  flowNodeData: FlowNodeData;
+  flowInstance: FlowInstance;
+  constructor(flowNodeData: FlowNodeData, flowInstance: FlowInstance) {
+    this.flowNodeData = flowNodeData;
+    this.flowInstance = flowInstance;
   }
 }

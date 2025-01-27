@@ -1,64 +1,55 @@
-import Konva from "konva";
 import "./style.css";
 import { FlowInstance, ViewProps } from "./type";
 import { FlowNodeData } from "./type/node";
-import { FlowEdges } from "./type/edge";
-import {
-  FlowNodeColor,
-  FlowNodeSize,
-  FlowTextProperty,
-} from "./config/default";
 import { createFlowInstance } from "./flowInstance";
+import FlowNode from "./component/node";
+import Konva from "konva";
+import { FlowEdgeData } from "./type/edge";
+import FlowEdge from "./component/edge";
 
 export default class FlowGraphic {
   flowInstance: FlowInstance;
-  flowNodes: FlowNodeData[] = [];
-  FlowEdges: FlowEdges[] = [];
+  nodes: FlowNode[] = [];
+  private nodesMap: { [key in string]: FlowNode } = {};
+  flowEdges: FlowEdge[] = [];
+
   constructor(viewOpts: ViewProps) {
     this.flowInstance = createFlowInstance(viewOpts);
   }
-  setNodes(nodes: FlowNodeData[]) {
-    this.flowNodes = nodes;
+
+  buildNodeFromData(nodeData: FlowNodeData[]) {
+    for (const i in nodeData) {
+      const data = nodeData[i];
+      const node = new FlowNode(
+        {
+          ...data,
+          isFirstNode: data.id === nodeData[0]?.id,
+          isLastNode: data.id === nodeData[nodeData.length - 1]?.id,
+        },
+        this.flowInstance
+      );
+      this.nodes.push(node);
+      this.nodesMap[data.id] = node;
+    }
   }
-  setEdges(edges: FlowEdges[]) {
-    this.FlowEdges = edges;
+  buildEdge(edges: FlowEdgeData[]) {
+    for (const edge of edges) {
+      const edgeInstance = new FlowEdge(edge, this.nodesMap, this.flowInstance);
+      this.flowEdges.push(edgeInstance);
+    }
   }
+
+  setEdges(edges: FlowEdge[]) {
+    this.flowEdges = edges;
+  }
+
   render() {
-    this.renderNode();
-  }
-  renderNode() {
-    //绘制整个流程图  然后支持html填充
-    const { layer } = this.flowInstance;
-    for (const i in this.flowNodes) {
-      const node = this.flowNodes[i];
-      const group = new Konva.Group({
-        ...node.position,
-      });
-      const rect = new Konva.Rect({
-        strokeWidth: FlowNodeSize.STORE_WIDTH,
-        stroke: FlowNodeColor.STORE_COLOR,
-        width: FlowNodeSize.WIDTH,
-        height: FlowNodeSize.HEIGHT,
-      });
-      const text = new Konva.Text({
-        text: node.data?.label || "",
-        width: FlowNodeSize.WIDTH,
-        height: FlowNodeSize.HEIGHT,
-        fontSize: FlowNodeSize.FONT_SIZE,
-        padding: FlowTextProperty.PADDING,
-        align: FlowTextProperty.ALIGN,
-        verticalAlign: FlowTextProperty.VERCTIL_ALIGN,
-      });
-      const point = new Konva.Circle({
-        x: rect.width() / 2,
-        y: Number(i) === this.flowNodes.length - 1 ? 0 : rect.height(),
-        radius: FlowNodeSize.radiusSize,
-        fill: FlowNodeColor.CIRCLE_COLOR,
-      });
-      group.add(rect);
-      group.add(text);
-      group.add(point);
-      layer.add(group);
+    for (const node of this.nodes) {
+      node.render();
+    }
+    for (const edge of this.flowEdges) {
+      console.log(edge);
+      edge.render();
     }
   }
 }

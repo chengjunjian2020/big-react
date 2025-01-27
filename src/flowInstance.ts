@@ -16,12 +16,12 @@ class FlowInstance {
     this.layer = layer;
   }
 }
-let flowInstance: FlowInstance;
+const flowInstanceMap: { [key in string]: FlowInstance } = {};
 function createFlowInstance(viewOpts: ViewProps) {
-  if (!flowInstance) {
-    flowInstance = new FlowInstance(viewOpts);
+  if (!flowInstanceMap[viewOpts.id]) {
+    const flowInstance = new FlowInstance(viewOpts);
     return flowInstance;
   }
-  return flowInstance;
+  return flowInstanceMap[viewOpts.id];
 }
-export { flowInstance, createFlowInstance };
+export { flowInstanceMap, createFlowInstance };

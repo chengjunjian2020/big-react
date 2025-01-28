@@ -41,7 +41,7 @@ export default defineConfig({
     alias: [
       { find: "@", replacement: path.resolve(__dirname, "src") },
       { find: "@@", replacement: path.resolve(__dirname) },
-      { find: "flow-graphix", replacement: path.resolve(__dirname, "src") },
+      { find: "flow-graph", replacement: path.resolve(__dirname, "src") },
     ],
   },
 });

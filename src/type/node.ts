@@ -1,3 +1,6 @@
+import BaseNode from "@/component/BaseNode";
+import { FlowInstance } from ".";
+
 export interface FlowNodeData {
   id: string;
   type?: string;
@@ -15,4 +18,13 @@ export interface FlowNodeData {
 export interface FlowNodeOpts {
   isFirstNode?: boolean;
   isLastNode?: boolean;
+}
+export type BaseNodeConstructor = new (
+  flowNodeData: FlowNodeData,
+  flowInstance: FlowInstance
+) => BaseNode;
+
+export interface FlowNodeCustom {
+  type: string;
+  component: BaseNodeConstructor;
 }

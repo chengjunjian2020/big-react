@@ -1,33 +1,46 @@
 import "./style.css";
 import { FlowInstance, ViewProps } from "./type";
-import { FlowNodeData } from "./type/node";
+import { BaseNodeConstructor, FlowNodeCustom, FlowNodeData } from "./type/node";
 import { createFlowInstance } from "./flowInstance";
 import FlowNode from "./component/node";
-import Konva from "konva";
 import { FlowEdgeData } from "./type/edge";
 import FlowEdge from "./component/edge";
+import BaseNode from "./component/BaseNode";
 
 export default class FlowGraphic {
   flowInstance: FlowInstance;
-  nodes: FlowNode[] = [];
-  private nodesMap: { [key in string]: FlowNode } = {};
+  nodes: BaseNode[] = [];
+  private nodesMap: { [key in string]: BaseNode } = {};
   flowEdges: FlowEdge[] = [];
+  customNodeMap: { [key in string]: BaseNodeConstructor } = {};
 
   constructor(viewOpts: ViewProps) {
     this.flowInstance = createFlowInstance(viewOpts);
   }
-
+  addNodeType(nodes: FlowNodeCustom | FlowNodeCustom[]) {
+    const tempNodeList = Array.isArray(nodes) ? nodes : [nodes];
+    for (const flowNode of tempNodeList) {
+      this.customNodeMap[flowNode.type] = flowNode.component;
+    }
+  }
   buildNodeFromData(nodeData: FlowNodeData[]) {
     for (const i in nodeData) {
       const data = nodeData[i];
-      const node = new FlowNode(
-        {
-          ...data,
-          isFirstNode: data.id === nodeData[0]?.id,
-          isLastNode: data.id === nodeData[nodeData.length - 1]?.id,
-        },
-        this.flowInstance
-      );
+      const { customNodeMap } = this;
+      let node;
+      if (customNodeMap[data.type as string]) {
+        node = new customNodeMap[data.type as string](data, this.flowInstance);
+      } else {
+        node = new FlowNode(
+          {
+            ...data,
+            isFirstNode: data.id === nodeData[0]?.id,
+            isLastNode: data.id === nodeData[nodeData.length - 1]?.id,
+          },
+          this.flowInstance
+        ) as BaseNode;
+      }
+
       this.nodes.push(node);
       this.nodesMap[data.id] = node;
     }
@@ -48,7 +61,6 @@ export default class FlowGraphic {
       node.render();
     }
     for (const edge of this.flowEdges) {
-      console.log(edge);
       edge.render();
     }
   }
